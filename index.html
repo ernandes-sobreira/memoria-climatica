@@ -29,6 +29,11 @@
   .hud{display:flex;gap:18px;justify-content:center;margin:8px 0 14px;font-size:.95rem;flex-wrap:wrap}
   .hud b{color:var(--accent)}
   .board{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:min(560px,95vw)}
+  .board.hard{gap:7px;width:min(960px,96vw)}
+  @media(min-width:700px){.board.hard{grid-template-columns:repeat(8,1fr)}}
+  .board.hard .back{font-size:.6rem;padding:4px;line-height:1.1}
+  .board.hard .back.term{font-size:.7rem}
+  .board.hard .front{font-size:1.2rem}
   .card{aspect-ratio:3/4;perspective:800px;cursor:pointer}
   .inner{position:relative;width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d}
   .card.flip .inner,.card.matched .inner{transform:rotateY(180deg)}
@@ -84,6 +89,7 @@
 <div class="levels">
   <button id="btnBasico" class="active" onclick="setLevel('basico')">Básico</button>
   <button id="btnInter" onclick="setLevel('inter')">Intermediário</button>
+  <button id="btnDificil" onclick="setLevel('dificil')">Difícil</button>
 </div>
 
 <div class="hud">
@@ -157,6 +163,24 @@ const DATA = {
     {t:"Anomalia de temperatura", d:"Desvio em relação a uma média de referência.", e:"Relatórios de clima usam anomalias para comparar com um período-base."},
     {t:"Amplitude térmica", d:"Diferença entre a temperatura máxima e a mínima.", e:"Desertos têm grande amplitude diária: o ar seco perde calor rápido à noite."},
     {t:"Microclima", d:"Condições climáticas específicas de um local pequeno.", e:"Um parque arborizado pode ser vários graus mais fresco que a rua ao lado."}
+  ],
+  dificil:[
+    {t:"Forçante radiativa", d:"Variação no balanço de energia da Terra, em W/m².", e:"Forçante positiva (ex.: +CO₂) aquece o sistema; negativa (ex.: aerossóis) resfria."},
+    {t:"Sensibilidade climática", d:"Aquecimento de equilíbrio ao dobrar o CO₂ atmosférico.", e:"Estimada em ~2,5–4 °C; é parâmetro central dos modelos climáticos."},
+    {t:"Albedo planetário", d:"Fração da radiação solar refletida pela Terra (~0,3).", e:"Cerca de 30% da energia solar volta ao espaço sem aquecer o planeta."},
+    {t:"Inversão térmica", d:"Ar quente sobre ar frio, travando a dispersão vertical.", e:"Comum em noites frias de inverno; concentra poluentes junto ao solo."},
+    {t:"Corrente de jato", d:"Vento intenso em altitude que guia sistemas meteorológicos.", e:"Flui a ~9–12 km de altitude e direciona frentes frias e tempestades."},
+    {t:"ENSO", d:"Oscilação acoplada oceano-atmosfera do Pacífico (El Niño/La Niña).", e:"Altera chuvas e temperaturas no mundo todo, inclusive no Brasil."},
+    {t:"Célula de Hadley", d:"Circulação atmosférica entre o equador e ~30° de latitude.", e:"Ar sobe no equador (chuva) e desce nos subtrópicos (desertos)."},
+    {t:"Efeito Coriolis", d:"Desvio aparente dos ventos causado pela rotação da Terra.", e:"Desvia para a esquerda no Hemisfério Sul e para a direita no Norte."},
+    {t:"Calor latente", d:"Energia absorvida ou liberada na mudança de fase da água.", e:"A evaporação resfria a superfície; a condensação libera calor nas nuvens."},
+    {t:"Calor sensível", d:"Energia que muda a temperatura sem mudança de fase.", e:"É o calor que você 'sente': aquece o ar e o solo diretamente."},
+    {t:"Ponto de orvalho", d:"Temperatura em que o ar satura e o vapor condensa.", e:"Quanto mais perto da temperatura do ar, mais úmido e abafado o dia."},
+    {t:"ZCIT", d:"Faixa equatorial de nuvens onde os ventos alísios convergem.", e:"A Zona de Convergência Intertropical regula as chuvas no Norte/Nordeste."},
+    {t:"Continentalidade", d:"Maior amplitude térmica em regiões afastadas do oceano.", e:"Sem o efeito regulador do mar, interiores esquentam e esfriam mais."},
+    {t:"Retroalimentação gelo-albedo", d:"Degelo expõe superfície escura, que absorve mais calor.", e:"Feedback positivo: mais derretimento → mais absorção → mais aquecimento."},
+    {t:"Estratosfera", d:"Camada estável acima da troposfera, onde fica o ozônio.", e:"Nela a temperatura sobe com a altitude — o oposto da troposfera."},
+    {t:"Paleoclimatologia", d:"Estudo dos climas do passado por meio de proxies.", e:"Testemunhos de gelo, anéis de árvores e sedimentos revelam climas antigos."}
   ]
 };
 
@@ -164,11 +188,14 @@ let level='basico', deck=[], firstCard=null, lock=false, matched=0, errors=0;
 let startTime=null, timerInt=null, elapsed=0, scoreSaved=false;
 let db=null, fsFns=null;
 
+const LEVEL_NAMES={basico:'Básico',inter:'Intermediário',dificil:'Difícil'};
+
 function setLevel(l){
   level=l;
   document.getElementById('btnBasico').classList.toggle('active',l==='basico');
   document.getElementById('btnInter').classList.toggle('active',l==='inter');
-  document.getElementById('rankLevel').textContent = l==='basico'?'Básico':'Intermediário';
+  document.getElementById('btnDificil').classList.toggle('active',l==='dificil');
+  document.getElementById('rankLevel').textContent = LEVEL_NAMES[l];
   restart(); loadRanking();
 }
 
@@ -185,6 +212,7 @@ function buildDeck(){
 
 function render(){
   const board=document.getElementById('board');
+  board.classList.toggle('hard',level==='dificil');
   board.innerHTML='';
   deck.forEach((c,idx)=>{
     const el=document.createElement('div');
@@ -237,7 +265,7 @@ function flip(idx,el){
 function win(){
   clearInterval(timerInt);
   const w=document.getElementById('win');
-  const nivel=level==='basico'?'Básico':'Intermediário';
+  const nivel=LEVEL_NAMES[level];
   document.getElementById('winMsg').textContent=
     `Nível ${nivel}: ${DATA[level].length} pares, ${errors} erro(s), ${elapsed}s. Coloque seu nome e entre para o Ranking Global! 🌍`;
   document.getElementById('saveStatus').textContent='';
