@@ -3,87 +3,165 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Memória Climática 🌡️</title>
+<title>Memória Climática</title>
 <style>
   :root{
-    --bg1:#0a2540; --bg2:#1e6091; --accent:#ffb703; --accent2:#fb8500;
-    --card:#ffffff; --ok:#2a9d8f; --text:#13314b; --err:#e76f51;
+    --ink:#0f2f44; --soft:#4b6a7d; --blue:#f97316; --blue2:#fb923c; --deep:#c2410c;
+    --ok:#16a34a; --err:#dc2626; --paper:#fffdf5; --line:#dbe7ee;
+    --cols:4; --cw:96px; --gap:12px; --fs:12px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{
-    font-family:"Segoe UI",system-ui,sans-serif;
-    min-height:100vh;color:#fff;
-    background:linear-gradient(160deg,var(--bg1),var(--bg2));
-    display:flex;flex-direction:column;align-items:center;padding:18px;
+    font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;
+    min-height:100vh;color:var(--ink);background:#ffffff;
+    display:flex;flex-direction:column;align-items:center;padding:12px 14px 40px;
   }
-  header{text-align:center;max-width:720px}
-  h1{font-size:clamp(1.5rem,5vw,2.3rem);margin-bottom:2px;letter-spacing:.5px}
-  h1 .spark{color:var(--accent)}
-  .sub{opacity:.85;font-size:.95rem;margin-bottom:14px}
-  .levels{display:flex;gap:10px;justify-content:center;margin-bottom:12px;flex-wrap:wrap}
+  .top{width:100%;max-width:1040px;display:flex;justify-content:flex-start}
+  .hub{display:inline-flex;align-items:center;gap:6px;color:var(--deep);text-decoration:none;
+    font-weight:600;font-size:.9rem;padding:7px 12px;border-radius:20px;border:1.5px solid var(--line)}
+  .hub:hover{background:#f0f9ff}
+  .hub svg{width:14px;height:14px}
+  header{text-align:center;max-width:720px;margin-top:6px}
+  h1{font-size:clamp(1.45rem,5vw,2.2rem);display:flex;align-items:center;justify-content:center;gap:10px}
+  h1 svg{width:.9em;height:.9em}
+  h1 .spark{color:var(--blue)}
+  .sub{color:var(--soft);font-size:.95rem;margin:4px 0 12px}
+  .levels{display:flex;gap:8px;justify-content:center;margin-bottom:10px;flex-wrap:wrap}
   .levels button{
-    border:2px solid rgba(255,255,255,.5);background:transparent;color:#fff;
-    padding:9px 18px;border-radius:30px;font-size:.95rem;cursor:pointer;transition:.2s;font-weight:600;
+    border:2px solid var(--line);background:#fff;color:var(--ink);
+    padding:8px 16px;border-radius:30px;font-size:.92rem;cursor:pointer;transition:.2s;font-weight:600;font-family:inherit;
   }
-  .levels button.active{background:var(--accent);border-color:var(--accent);color:var(--text)}
-  .hud{display:flex;gap:18px;justify-content:center;margin:8px 0 14px;font-size:.95rem;flex-wrap:wrap}
-  .hud b{color:var(--accent)}
-  .board{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:min(560px,95vw)}
-  .board.hard{gap:7px;width:min(960px,96vw)}
-  @media(min-width:700px){.board.hard{grid-template-columns:repeat(8,1fr)}}
-  .board.hard .back{font-size:.6rem;padding:4px;line-height:1.1}
-  .board.hard .back.term{font-size:.7rem}
-  .board.hard .front{font-size:1.2rem}
-  .card{aspect-ratio:3/4;perspective:800px;cursor:pointer}
-  .inner{position:relative;width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d}
+  .levels button.active{background:var(--blue);border-color:var(--blue);color:#fff}
+  .hud{display:flex;gap:18px;justify-content:center;margin:4px 0 12px;font-size:.95rem;flex-wrap:wrap;color:var(--soft)}
+  .hud b{color:var(--deep)}
+  .hud{align-items:center}
+  .mini{border:2px solid var(--line);background:#fff;color:var(--deep);padding:5px 12px;border-radius:20px;font-size:.85rem;font-weight:700;cursor:pointer;font-family:inherit}
+  .mini:hover{background:#f0f9ff}
+
+  /* mesa clara, com veios de madeira */
+  .mesa{
+    padding:22px;border-radius:24px;max-width:100%;position:relative;z-index:1;isolation:isolate;
+    background-image:
+      repeating-linear-gradient(91deg,rgba(150,100,40,.07) 0 2px,transparent 2px 23px),
+      repeating-linear-gradient(89deg,rgba(150,100,40,.04) 0 1px,transparent 1px 9px),
+      linear-gradient(180deg,#f9efd9,#f2e1bf);
+    box-shadow:inset 0 0 0 3px #e6cf9f, inset 0 0 0 9px rgba(255,255,255,.35), 0 10px 26px rgba(15,47,68,.10);
+  }
+  .board{position:relative;width:var(--tw,300px);height:var(--th,300px);max-width:100%}
+
+  .card{
+    position:absolute;left:0;top:0;z-index:var(--z,1);
+    width:var(--cw);height:calc(var(--cw)*1.32);border:0;background:none;padding:0;font-family:inherit;
+    perspective:700px;cursor:grab;touch-action:none;-webkit-tap-highlight-color:transparent;user-select:none;
+    transform:translate(var(--x,0px),var(--y,0px)) rotate(var(--r,0deg)) scale(var(--s,1));
+    transition:transform .18s ease;
+  }
+  /* arremesso: a carta sai da mao do jogador, gira e desliza ate parar */
+  .card.deal{animation:throw .6s cubic-bezier(.14,.78,.28,1) backwards;animation-delay:var(--d,0ms)}
+  @keyframes throw{
+    0%{opacity:0;transform:translate(var(--sx,0px),var(--sy,0px)) rotate(calc(var(--r,0deg) - 230deg)) scale(.9)}
+    14%{opacity:1}
+    82%{transform:translate(var(--x,0px),var(--y,0px)) rotate(calc(var(--r,0deg) + 5deg)) scale(1.02)}
+  }
+  @media(hover:hover){.card:hover{--s:1.04}}
+  .card:focus-visible{--s:1.04;outline:none}
+  .card:focus-visible .inner{box-shadow:0 0 0 3px var(--blue)}
+  .card.flip{z-index:9000;transform:translate(var(--x,0px),var(--y,0px)) rotate(calc(var(--r,0deg)*.25)) scale(1.07)}
+  .card.matched{z-index:0;transform:translate(var(--x,0px),var(--y,0px)) rotate(var(--r,0deg)) scale(1)}
+  .card.drag{transition:none;cursor:grabbing;z-index:9500;--s:1.1}
+  .card.drag.flip,.card.drag.matched{transform:translate(var(--x,0px),var(--y,0px)) rotate(calc(var(--r,0deg)*.25)) scale(1.1)}
+  .card.drag .face{box-shadow:0 14px 26px rgba(15,47,68,.30)}
+  .inner{position:relative;width:100%;height:100%;transition:transform .42s;transform-style:preserve-3d;border-radius:10px}
   .card.flip .inner,.card.matched .inner{transform:rotateY(180deg)}
   .face{
-    position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;
-    display:flex;align-items:center;justify-content:center;text-align:center;padding:8px;
-    font-weight:600;box-shadow:0 4px 10px rgba(0,0,0,.25)
+    position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:10px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+    box-shadow:0 3px 0 rgba(15,47,68,.10),0 6px 12px rgba(15,47,68,.18);overflow:hidden;
   }
-  .front{background:linear-gradient(145deg,var(--accent),var(--accent2));color:var(--text);font-size:1.8rem}
-  .back{background:var(--card);color:var(--text);transform:rotateY(180deg);font-size:.78rem;line-height:1.15}
-  .back.term{font-size:.95rem;font-weight:700;background:#e8f1fb}
-  .card.matched .inner{box-shadow:0 0 0 3px var(--ok)}
-  .card.matched{cursor:default;animation:pop .4s}
-  @keyframes pop{50%{transform:scale(1.05)}}
-  .feedback{
-    margin-top:16px;background:rgba(255,255,255,.12);border-radius:12px;padding:12px 16px;
-    width:min(560px,95vw);min-height:60px;font-size:.9rem;line-height:1.35
+  .front{
+    background:
+      radial-gradient(circle at 50% 50%,rgba(255,255,255,.0) 0 34%,rgba(255,255,255,.16) 35% 37%,transparent 38%),
+      repeating-linear-gradient(45deg,rgba(255,255,255,.13) 0 6px,transparent 6px 12px),
+      linear-gradient(150deg,var(--blue2),var(--blue));
+    border:4px solid #fff;
   }
-  .feedback b{color:var(--accent)}
-  .win{text-align:center;margin-top:16px;background:rgba(42,157,143,.25);border:1px solid var(--ok);
-    border-radius:12px;padding:18px;width:min(560px,95vw);display:none}
+  .front svg{width:38%;height:auto}
+  .back{transform:rotateY(180deg);color:var(--ink);font-size:var(--fs);line-height:1.18;font-weight:600;padding:6%;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:anywhere}
+  .back.term{background:#fff;border:2px solid #bae6fd;justify-content:space-between;padding:7% 5% 8%}
+  .back.term .art{width:74%;flex:1;display:flex;align-items:center;justify-content:center;min-height:0}
+  .back.term .art svg{width:100%;height:100%;max-height:100%}
+  .back.term .lbl{font-weight:800;font-size:calc(var(--fs)*1.06);color:var(--deep);line-height:1.1;max-width:100%;flex:none;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:anywhere}
+  .back.def{background:var(--paper);border:2px solid #f0d9a4}
+  .back.def::before{content:"";position:absolute;left:0;right:0;top:0;height:7%;background:#f6d98a}
+  .card.matched .back{border-color:var(--ok);box-shadow:0 0 0 3px rgba(22,163,74,.35),0 6px 12px rgba(15,47,68,.14)}
+  .card.wrong .back{border-color:var(--err)}
+
+  /* leitor: mostra por extenso o texto das cartas abertas */
+  .reader{
+    position:sticky;bottom:10px;z-index:6;margin-top:14px;width:min(640px,100%);
+    background:#fff;border:2px solid var(--line);border-radius:16px;padding:12px 16px;
+    font-size:1rem;line-height:1.35;min-height:76px;box-shadow:0 8px 22px rgba(15,47,68,.14);
+  }
+  .reader .row{display:flex;gap:8px;align-items:baseline}
+  .reader .row + .row{margin-top:4px}
+  .reader .tag{flex:none;font-size:.72rem;font-weight:800;letter-spacing:.4px;text-transform:uppercase;
+    padding:2px 7px;border-radius:8px;background:#ffedd5;color:var(--deep)}
+  .reader .tag.d{background:#fdf0c9;color:#8a5a00}
+  .reader .msg{margin-top:6px;font-weight:700}
+  .reader .msg.ok{color:var(--ok)} .reader .msg.no{color:var(--err)}
+  .reader .hint{color:var(--soft);font-weight:400;font-size:.88rem}
+  .reader .exp{color:var(--soft);margin-top:4px}
+
+  .win{display:none;margin-top:16px;width:min(640px,100%);background:#f0fdf4;border:2px solid #86efac;
+    border-radius:16px;padding:18px;text-align:center}
   .win.show{display:block}
-  .win h2{margin-bottom:6px}
-  .savebox{margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-  .savebox input{
-    padding:10px 14px;border-radius:30px;border:none;font-size:.95rem;width:min(220px,60vw);
-    text-align:center;color:var(--text)
-  }
-  .btn{background:var(--accent);color:var(--text);border:none;padding:11px 22px;
-    border-radius:30px;font-weight:700;cursor:pointer;font-size:.95rem}
+  .win h2{font-size:1.3rem;margin-bottom:6px;color:#166534}
+  .savebox{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+  .savebox input{padding:10px 12px;border-radius:10px;border:2px solid var(--line);font-size:1rem;width:220px;font-family:inherit}
+  .btn{background:var(--blue);color:#fff;border:0;padding:10px 18px;border-radius:10px;font-weight:700;cursor:pointer;font-size:.95rem;font-family:inherit}
   .btn:disabled{opacity:.5;cursor:default}
-  .btn.ghost{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.5)}
-  .ranking{
-    margin-top:16px;background:rgba(255,255,255,.10);border-radius:12px;padding:14px 16px;
-    width:min(560px,95vw)
+  .btn.ghost{background:#fff;color:var(--deep);border:2px solid var(--line)}
+
+  .ranking{margin-top:16px;width:min(640px,100%);background:#fff;border:2px solid var(--line);border-radius:16px;padding:16px}
+  .ranking h3{font-size:1.02rem;margin-bottom:8px}
+  .ranking h3 span{color:var(--blue)}
+  .ranking ol{list-style:none}
+  .ranking li{display:flex;justify-content:space-between;gap:10px;padding:7px 4px;border-bottom:1px solid var(--line);font-size:.93rem}
+  .ranking li:last-child{border-bottom:0}
+  .ranking .pos{display:inline-block;min-width:2.1em;font-weight:800;color:var(--deep)}
+  .note{font-size:.8rem;color:var(--soft);margin-top:6px}
+  footer{margin-top:22px;font-size:.8rem;color:var(--soft);text-align:center;line-height:1.6}
+  footer .credit{font-weight:700;color:var(--ink)}
+
+  @media(max-width:560px){
+    body{padding:8px 8px 32px}
+    .mesa{padding:12px;border-radius:18px}
+    .sub{display:none}
+    header{margin-top:2px}
+    h1{margin-bottom:8px}
+    .hub{padding:4px 10px;font-size:.82rem}
+    .levels{margin-bottom:6px}
+    .hud{gap:10px;font-size:.86rem;margin:2px 0 8px}
+    .mini{padding:3px 10px;font-size:.8rem}
+    .reader{min-height:64px;font-size:.86rem;padding:8px 12px;margin-top:10px}
+    .reader .hint{font-size:.8rem}
+    .levels button{padding:7px 12px;font-size:.85rem}
   }
-  .ranking h3{margin-bottom:8px;font-size:1rem}
-  .ranking h3 span{color:var(--accent)}
-  .ranking ol{list-style:none;font-size:.9rem}
-  .ranking li{display:flex;justify-content:space-between;padding:5px 4px;border-bottom:1px solid rgba(255,255,255,.12)}
-  .ranking li:first-child{color:var(--accent);font-weight:700}
-  .ranking .note{font-size:.8rem;opacity:.7;margin-top:6px;line-height:1.3}
-  footer{margin-top:22px;opacity:.75;font-size:.82rem;text-align:center;line-height:1.5}
-  footer .credit{font-weight:600;opacity:1}
+  @media(prefers-reduced-motion:reduce){.card.deal{animation:none}.inner{transition:none}}
 </style>
 </head>
 <body>
+<div class="top">
+  <a class="hub" href="https://ernandes-sobreira.github.io/jogos-ambientais/">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 2 4 8l6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Todos os jogos
+  </a>
+</div>
+
 <header>
-  <h1>🌡️ Memória <span class="spark">Climática</span></h1>
-  <p class="sub">Encontre os pares conceito ↔ definição. Menos erros e menos tempo = topo do ranking! 🏆</p>
+  <h1><svg viewBox="-12 -16 24 32" aria-hidden="true"><rect x="-4" y="-14" width="8" height="20" rx="4" fill="#fff" stroke="#c2410c" stroke-width="1.6"/><circle cx="0" cy="8" r="6.5" fill="#f97316"/><rect x="-1.6" y="-8" width="3.2" height="14" rx="1.6" fill="#f97316"/></svg>
+  Memória <span class="spark">Climática</span></h1>
+  <p class="sub">Junte cada desenho com a sua definição. Arraste as cartas para arrumar a mesa.</p>
 </header>
 
 <div class="levels">
@@ -96,41 +174,36 @@
   <span>Pares: <b id="pairs">0</b>/<span id="total">8</span></span>
   <span>Erros: <b id="errors">0</b></span>
   <span>Tempo: <b id="timer">0s</b></span>
+  <button class="mini" type="button" onclick="restart()">Embaralhar</button>
 </div>
 
-<div class="board" id="board"></div>
+<div class="mesa"><div class="board" id="board"></div></div>
 
-<div class="feedback" id="feedback">Vire duas cartas para começar — o cronômetro dispara na primeira carta. Quando achar um par, a explicação aparece aqui. 👀</div>
+<div class="reader" id="reader" aria-live="polite"></div>
 
 <div class="win" id="win">
-  <h2>🎉 Você completou!</h2>
+  <h2>Você completou!</h2>
   <p id="winMsg"></p>
   <div class="savebox">
     <input id="playerName" maxlength="20" placeholder="Seu nome (até 20 letras)">
-    <button class="btn" id="saveBtn" onclick="saveScore()">Salvar no ranking 🏆</button>
+    <button class="btn" id="saveBtn" onclick="saveScore()">Salvar no ranking</button>
   </div>
   <p id="saveStatus" style="margin-top:8px;font-size:.85rem"></p>
   <button class="btn ghost" style="margin-top:10px" onclick="restart()">Jogar de novo</button>
 </div>
 
 <div class="ranking" id="rankingBox">
-  <h3>🏆 Ranking Global — nível <span id="rankLevel">Básico</span></h3>
-  <ol id="rankList"><li>Carregando…</li></ol>
+  <h3>Ranking Global, nível <span id="rankLevel">Básico</span></h3>
+  <ol id="rankList"><li><span>Carregando o ranking...</span></li></ol>
   <p class="note" id="rankNote"></p>
 </div>
 
 <footer>
-  App ambiental do dia · Temperatura e Clima · Jogo da Memória<br>
-  <span class="credit">— Idealizado por Ernandes Sobreira —</span>
+  Clima e Tempo · Jogo da Memória<br>
+  <span class="credit">Idealizado por Ernandes Sobreira</span>
 </footer>
 
 <script>
-/* ===================== RANKING GLOBAL (Firebase) =====================
-   1. Crie um projeto em https://console.firebase.google.com
-   2. Ative o Cloud Firestore
-   3. Cole abaixo o firebaseConfig do seu app Web (Configurações do projeto → Seus apps)
-   Enquanto o apiKey estiver vazio, o jogo funciona normalmente offline,
-   apenas sem o ranking online. */
 const firebaseConfig = {
   apiKey: "AIzaSyCbXi3UCVl8oLleBzGb6DqWSxbZmZU2yDQ",
   authDomain: "jogos-ranking.firebaseapp.com",
@@ -140,13 +213,75 @@ const firebaseConfig = {
   messagingSenderId: "958784915420",
   appId: "1:958784915420:web:4212d3ad278f02d600f119"
 };
-const GAME_ID = "2026-06-06-memoria-climatica"; // identificador único deste jogo
-/* ==================================================================== */
+const GAME_ID = "2026-06-06-memoria-climatica";
+
+/* ---------- desenhos das cartas (SVG, viewBox 64x64) ---------- */
+const svg = inner => `<svg viewBox="0 0 64 64" aria-hidden="true">${inner}</svg>`;
+const cloud = (x,y,s=1,f='#cbd5e1') => `<g transform="translate(${x} ${y}) scale(${s})" fill="${f}"><circle cx="10" cy="14" r="9"/><circle cx="22" cy="11" r="11"/><circle cx="33" cy="15" r="8"/><rect x="2" y="13" width="38" height="11" rx="5.5"/></g>`;
+const drop = (x,y,s=1,f='#0ea5e9') => `<path transform="translate(${x} ${y}) scale(${s})" d="M0-9C4-3 6 0 6 3a6 6 0 0 1-12 0C-6 0-4-3 0-9z" fill="${f}"/>`;
+const sun = (x,y,r=8) => {
+  let rays='';
+  for(let i=0;i<8;i++){const a=i*Math.PI/4,c=Math.cos(a),s=Math.sin(a);
+    rays+=`M${(x+c*(r+3)).toFixed(1)} ${(y+s*(r+3)).toFixed(1)}L${(x+c*(r+7)).toFixed(1)} ${(y+s*(r+7)).toFixed(1)}`;}
+  return `<path d="${rays}" stroke="#f59e0b" stroke-width="2.6" stroke-linecap="round"/><circle cx="${x}" cy="${y}" r="${r}" fill="#fbbf24"/>`;
+};
+const arrow = (x1,y1,x2,y2,c='#0ea5e9',w=3.2) => {
+  const a=Math.atan2(y2-y1,x2-x1),h=w*2.1;
+  const p=(d,k)=>`${(x2-Math.cos(a+d)*h*k).toFixed(1)} ${(y2-Math.sin(a+d)*h*k).toFixed(1)}`;
+  return `<path d="M${x1} ${y1}L${x2} ${y2}" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/><path d="M${p(.55,1)}L${x2} ${y2}L${p(-.55,1)}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
+};
+const waves = (y,f='#38bdf8') => `<path d="M2 ${y}q7.5-6 15 0t15 0 15 0 15 0V62H2z" fill="${f}"/>`;
+const tree = (x,y,s=1) => `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-2" y="0" width="4" height="12" fill="#92400e"/><circle cx="0" cy="-6" r="10" fill="#22c55e"/><circle cx="-6" cy="0" r="6" fill="#16a34a"/><circle cx="6" cy="0" r="6" fill="#4ade80"/></g>`;
+const soil = (y,f='#c08457') => `<rect x="2" y="${y}" width="60" height="${62-y}" fill="${f}"/><rect x="2" y="${y-4}" width="60" height="6" rx="2" fill="#4ade80"/>`;
+const fish = (x,y,s=1,f='#f59e0b') => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M-9 0c4-6 12-6 16 0-4 6-12 6-16 0z" fill="${f}"/><path d="M-9 0l-6-5v10z" fill="${f}"/><circle cx="3" cy="-1" r="1.3" fill="#0f2f44"/></g>`;
+
+const thermo = (x,y,s=1,lvl=.6,f='#ef4444') => `<g transform="translate(${x} ${y}) scale(${s})"><rect x="-5" y="-24" width="10" height="34" rx="5" fill="#fff" stroke="#64748b" stroke-width="2"/><rect x="-2.2" y="${(-20+28*(1-lvl)).toFixed(1)}" width="4.4" height="${(28*lvl+4).toFixed(1)}" rx="2.2" fill="${f}"/><circle cx="0" cy="14" r="8" fill="${f}" stroke="#64748b" stroke-width="2"/></g>`;
+const globe = (cx,cy,r,ocean='#38bdf8',land='#22c55e') => `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${ocean}"/><path d="M${cx-r*.55} ${cy-r*.5}c${r*.3} ${-r*.2} ${r*.5} ${r*.1} ${r*.45} ${r*.4}s${-r*.35} ${r*.25} ${-r*.15} ${r*.6}c${-r*.35} ${-r*.05} ${-r*.5} ${-r*.5} ${-r*.3} ${-r}z M${cx+r*.15} ${cy+r*.05}c${r*.35} ${-r*.1} ${r*.55} ${r*.2} ${r*.4} ${r*.55}s${-r*.45} ${r*.2} ${-r*.45} ${-r*.1}z" fill="${land}"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#0369a1" stroke-width="2"/>`;
+const flake = (x,y,s=1,c='#7dd3fc') => `<g transform="translate(${x} ${y}) scale(${s})" stroke="${c}" stroke-width="2.4" stroke-linecap="round"><path d="M0-8v16M-7-4l14 8M-7 4l14-8M0-8l-3-3M0-8l3-3M0 8l-3 3M0 8l3 3"/></g>`;
+const bldg = (x,y,w,h,f='#94a3b8') => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${f}"/><g fill="#e0f2fe">${Array.from({length:Math.floor(h/9)},(_, i)=>`<rect x="${x+3}" y="${y+4+i*9}" width="${w/2-4}" height="4"/><rect x="${x+w/2+1}" y="${y+4+i*9}" width="${w/2-4}" height="4"/>`).join('')}</g>`;
+const ART = {
+  "Termômetro": svg(thermo(32,34,1.25,.65)+`<path d="M44 14h6M44 22h4M44 30h6M44 38h4" stroke="#64748b" stroke-width="2"/>`),
+  "Clima": svg(`<rect x="6" y="6" width="52" height="52" rx="6" fill="#fff" stroke="#c2410c" stroke-width="2.4"/><path d="M6 18h52" stroke="#c2410c" stroke-width="2.4"/><g fill="#fdba74">${[0,1,2,3].map(r=>[0,1,2,3].map(c=>`<rect x="${11+c*12}" y="${23+r*9}" width="8" height="5" rx="1"/>`).join('')).join('')}</g><path d="M14 4v8M50 4v8" stroke="#c2410c" stroke-width="3" stroke-linecap="round"/>`),
+  "Tempo": svg(sun(18,20,8)+cloud(20,20,1.05,'#cbd5e1')+`<path d="M26 48l-3 7M38 48l-3 7" stroke="#0ea5e9" stroke-width="3.6" stroke-linecap="round"/>`),
+  "Estações": svg(`<circle cx="32" cy="32" r="27" fill="#fff" stroke="#e2e8f0" stroke-width="2"/><path d="M32 5a27 27 0 0 1 27 27H32z" fill="#bbf7d0"/><path d="M59 32a27 27 0 0 1-27 27V32z" fill="#fde68a"/><path d="M32 59A27 27 0 0 1 5 32h27z" fill="#fdba74"/><path d="M5 32A27 27 0 0 1 32 5v27z" fill="#bae6fd"/>`+tree(45,20,.6)+sun(45,45,5)+`<path d="M14 49c2-4 6-5 8-1-3 0-6 1-8 1z" fill="#c2410c"/>`+flake(18,19,.8)),
+  "Sol": svg(sun(32,32,14)),
+  "Geada": svg(`<rect x="2" y="40" width="60" height="22" rx="3" fill="#bbf7d0"/><path d="M6 40l4-10 4 10M18 40l4-12 4 12M32 40l4-10 4 10M46 40l4-12 4 12" stroke="#16a34a" stroke-width="2.4" fill="none"/><path d="M2 40h60" stroke="#e0f2fe" stroke-width="5"/>`+flake(16,16,.9)+flake(32,10,.8)+flake(48,18,.9)),
+  "Sombra": svg(sun(52,10,6)+`<ellipse cx="26" cy="54" rx="20" ry="5" fill="#64748b" opacity=".35"/>`+tree(24,34,1.35)+`<rect x="2" y="56" width="60" height="6" rx="2" fill="#86efac"/>`),
+  "Agasalho": svg(`<path d="M22 10h20l12 8-6 10-4-3v31H20V25l-4 3-6-10z" fill="#f97316" stroke="#9a3412" stroke-width="2" stroke-linejoin="round"/><path d="M26 10c2 5 10 5 12 0" fill="none" stroke="#9a3412" stroke-width="2"/><path d="M32 16v40" stroke="#9a3412" stroke-width="1.6" stroke-dasharray="3 3"/>`+flake(10,48,.7)+flake(54,48,.7)),
+
+  "Albedo": svg(sun(10,10,6)+`<rect x="2" y="44" width="28" height="18" fill="#e0f2fe" stroke="#7dd3fc" stroke-width="1.6"/><rect x="34" y="44" width="28" height="18" fill="#166534"/>`+arrow(14,16,16,42,'#f59e0b',2.6)+arrow(16,42,26,22,'#f59e0b',2.6)+arrow(24,14,46,42,'#f59e0b',2.6)+`<path d="M46 50c0-3 4-3 4 0" stroke="#f97316" stroke-width="2.2" fill="none"/>`),
+  "Efeito estufa": svg(`<path d="M4 30a28 28 0 0 1 56 0" fill="none" stroke="#94a3b8" stroke-width="3.4" stroke-dasharray="5 4"/>`+globe(32,52,16)+sun(8,8,5)+arrow(12,12,26,40,'#f59e0b',2.4)+arrow(36,38,44,22,'#ef4444',2.4)+arrow(44,22,40,34,'#ef4444',2.4)),
+  "Gradiente térmico": svg(`<path d="M4 60 26 14l10 14 8-10 16 42z" fill="#a8a29e"/><path d="M22 22l4-8 5 7z" fill="#fff"/>`+thermo(52,22,.42,.15,'#3b82f6')+thermo(52,48,.42,.85,'#ef4444')),
+  "Ilha de calor urbana": svg(sun(50,8,5)+bldg(6,26,12,34,'#94a3b8')+bldg(20,16,12,44,'#64748b')+bldg(34,30,10,30,'#94a3b8')+tree(52,44,.75)+`<path d="M8 22c-2-4 2-6 0-10M26 12c-2-4 2-6 0-10" stroke="#ef4444" stroke-width="2.4" fill="none" stroke-linecap="round"/><rect x="2" y="58" width="60" height="4" fill="#475569"/>`),
+  "Inércia térmica": svg(sun(14,12,7)+waves(30,'#38bdf8')+`<rect x="2" y="44" width="60" height="18" fill="#0369a1"/>`+arrow(14,22,14,40,'#f59e0b',2.6)+`<path d="M40 22a8 8 0 1 1 0 .1" fill="#fff" stroke="#64748b" stroke-width="2"/><path d="M40 16v6h4" stroke="#64748b" stroke-width="2" fill="none" stroke-linecap="round"/>`),
+  "Anomalia de temperatura": svg(`<path d="M6 34h52" stroke="#64748b" stroke-width="1.6" stroke-dasharray="3 3"/><g>${[[-6,'#3b82f6'],[-3,'#3b82f6'],[-8,'#3b82f6'],[2,'#ef4444'],[5,'#ef4444'],[9,'#ef4444'],[14,'#ef4444']].map((v,i)=>v[0]<0?`<rect x="${8+i*7}" y="34" width="5" height="${-v[0]*1.6}" fill="${v[1]}"/>`:`<rect x="${8+i*7}" y="${34-v[0]*1.6}" width="5" height="${v[0]*1.6}" fill="${v[1]}"/>`).join('')}</g>`),
+  "Amplitude térmica": svg(sun(16,14,7)+`<path d="M54 10a7 7 0 1 0 0 12 6 6 0 0 1 0-12z" fill="#facc15"/>`+thermo(16,40,.55,.9,'#ef4444')+thermo(48,40,.55,.15,'#3b82f6')+`<path d="M24 46h16" stroke="#64748b" stroke-width="2.4" marker-end="none"/><path d="M36 42l4 4-4 4M28 42l-4 4 4 4" stroke="#64748b" stroke-width="2.4" fill="none"/>`),
+  "Microclima": svg(sun(32,10,6)+`<rect x="2" y="50" width="28" height="12" fill="#475569"/><rect x="34" y="50" width="28" height="12" fill="#86efac"/>`+tree(48,38,1)+thermo(14,32,.4,.85,'#ef4444')+thermo(48,10,.0001,.0001)+`<circle cx="56" cy="22" r="0"/>`),
+
+  "Forçante radiativa": svg(`<path d="M6 46h52" stroke="#64748b" stroke-width="2"/><path d="M32 46 14 46 32 22 50 46z" fill="none"/><path d="M8 40l24 6 24-14" stroke="#c2410c" stroke-width="3" fill="none"/><circle cx="32" cy="46" r="4" fill="#64748b"/><rect x="4" y="10" width="22" height="12" rx="3" fill="#fee2e2"/><text x="15" y="19" font-size="8" text-anchor="middle" fill="#b91c1c" font-weight="700">+W/m²</text>`+arrow(46,30,46,12,'#ef4444',2.6)),
+  "Sensibilidade climática": svg(`<g font-size="9" font-weight="800" fill="#0369a1"><text x="6" y="22">CO₂</text><text x="6" y="50">CO₂</text></g><text x="30" y="36" font-size="12" font-weight="900" fill="#0369a1">×2</text>`+arrow(26,30,40,30,'#64748b',2.4)+thermo(52,32,.6,.75,'#ef4444')),
+  "Albedo planetário": svg(sun(8,8,5)+globe(36,38,20)+`<path d="M24 24c4-6 14-8 20-2" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round"/>`+arrow(10,12,24,26,'#f59e0b',2.4)+arrow(26,22,12,6,'#fbbf24',2.4)),
+  "Inversão térmica": svg(`<rect x="2" y="2" width="60" height="24" fill="#fed7aa"/><rect x="2" y="26" width="60" height="36" fill="#dbeafe"/><path d="M2 26h60" stroke="#c2410c" stroke-width="2.4" stroke-dasharray="4 3"/>`+bldg(8,38,10,24,'#94a3b8')+bldg(22,44,8,18,'#64748b')+`<path d="M44 58v-20" stroke="#57534e" stroke-width="5"/><path d="M44 36c-6-3 6-5 0-8s6-5 2-6" stroke="#78716c" stroke-width="5" fill="none" stroke-linecap="round" opacity=".7"/><path d="M14 30h36" stroke="#78716c" stroke-width="3" opacity=".5"/>`),
+  "Corrente de jato": svg(globe(32,44,18)+`<path d="M4 18c10-10 18 8 28-2s18 8 28-2" stroke="#7c3aed" stroke-width="4" fill="none" stroke-linecap="round"/>`+arrow(50,12,60,14,'#7c3aed',3)),
+  "ENSO": svg(`<rect x="2" y="20" width="60" height="40" rx="4" fill="#38bdf8"/><path d="M34 20h28v40H34z" fill="#fb923c" opacity=".85"/><path d="M2 30q8-4 15 0t15 0 15 0 15 0" stroke="#fff" stroke-width="1.6" fill="none"/>`+cloud(36,0,.75,'#94a3b8')+`<path d="M44 20l-2 5M52 20l-2 5" stroke="#0369a1" stroke-width="2.4" stroke-linecap="round"/>`+sun(12,10,5)),
+  "Célula de Hadley": svg(`<path d="M2 56h60" stroke="#64748b" stroke-width="2"/><path d="M10 52V18c0-6 44-6 44 0v34" fill="none" stroke="#0ea5e9" stroke-width="3"/>`+arrow(10,40,10,22,'#0ea5e9',2.6)+arrow(54,22,54,42,'#f97316',2.6)+arrow(52,52,14,52,'#64748b',2.4)+cloud(0,4,.55,'#94a3b8')+sun(54,8,4)),
+  "Efeito Coriolis": svg(globe(32,32,24)+`<path d="M32 8v48" stroke="#0369a1" stroke-width="1.4"/><path d="M14 18c10 2 14 10 14 18" stroke="#c2410c" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M28 36l-4-5M28 36l4-5" stroke="#c2410c" stroke-width="3" stroke-linecap="round"/>`),
+  "Calor latente": svg(waves(44)+sun(52,10,5)+`<path d="M18 38c-4-6 4-8 0-14M30 38c-4-6 4-8 0-14" stroke="#94a3b8" stroke-width="3.2" fill="none" stroke-linecap="round"/>`+cloud(28,6,.7,'#cbd5e1')+`<path d="M38 28l4-6 4 6" stroke="#ef4444" stroke-width="2.6" fill="none"/>`),
+  "Calor sensível": svg(sun(14,12,7)+`<rect x="2" y="48" width="60" height="14" rx="2" fill="#c08457"/><path d="M20 44c-3-5 3-7 0-12M32 44c-3-5 3-7 0-12M44 44c-3-5 3-7 0-12" stroke="#ef4444" stroke-width="2.8" fill="none" stroke-linecap="round"/>`+thermo(54,30,.45,.8,'#ef4444')),
+  "Ponto de orvalho": svg(`<rect x="2" y="44" width="60" height="18" fill="#86efac"/><path d="M10 44c4-12 10-18 14-22M24 44c2-10 6-16 12-20M40 44c4-12 10-18 12-22" stroke="#16a34a" stroke-width="3" fill="none" stroke-linecap="round"/>`+drop(24,24,.55)+drop(38,26,.55)+drop(52,24,.55)+drop(14,30,.45)),
+  "ZCIT": svg(globe(32,32,26,'#38bdf8','#22c55e')+`<rect x="6" y="27" width="52" height="10" fill="#e2e8f0" opacity=".9"/>`+cloud(8,20,.6,'#cbd5e1')+cloud(30,20,.6,'#cbd5e1')+arrow(10,14,22,26,'#64748b',2.2)+arrow(10,50,22,38,'#64748b',2.2)),
+  "Continentalidade": svg(waves(50,'#38bdf8')+`<path d="M2 46c10-4 14 0 22-2s14-14 38-14v18H2z" fill="#d6a97a"/>`+thermo(12,24,.4,.5,'#f97316')+thermo(50,16,.4,.95,'#ef4444')),
+  "Retroalimentação gelo-albedo": svg(`<path d="M32 8a24 24 0 1 1-17 7" fill="none" stroke="#f97316" stroke-width="3"/><path d="M15 15l1-8 7 3" stroke="#f97316" stroke-width="3" fill="none"/><path d="M18 34l10-8 12 4 6 10-14 6z" fill="#e0f2fe" stroke="#7dd3fc" stroke-width="1.6"/><path d="M28 26l6 12" stroke="#0369a1" stroke-width="2"/>`+sun(48,14,5)),
+  "Estratosfera": svg(`<rect x="2" y="2" width="60" height="22" fill="#ede9fe"/><rect x="2" y="24" width="60" height="38" fill="#e0f2fe"/><path d="M2 24h60" stroke="#7c3aed" stroke-width="2" stroke-dasharray="4 3"/><text x="30" y="16" font-size="8" font-weight="800" fill="#6d28d9" text-anchor="middle">O₃ O₃</text>`+cloud(4,34,.7,'#cbd5e1')+`<path d="M44 58 50 40l6 18z" fill="#a8a29e"/>`),
+  "Paleoclimatologia": svg(`<circle cx="22" cy="40" r="18" fill="#d6a97a"/><circle cx="22" cy="40" r="13" fill="none" stroke="#92400e" stroke-width="1.6"/><circle cx="22" cy="40" r="8" fill="none" stroke="#92400e" stroke-width="1.6"/><circle cx="22" cy="40" r="3" fill="#92400e"/><rect x="44" y="6" width="12" height="52" rx="4" fill="#e0f2fe" stroke="#7dd3fc" stroke-width="2"/><path d="M44 16h12M44 24h12M44 34h12M44 46h12" stroke="#7dd3fc" stroke-width="1.6"/>`)
+};
+ART["Microclima"]=svg(sun(32,10,6)+`<rect x="2" y="50" width="28" height="12" fill="#475569"/><rect x="34" y="50" width="28" height="12" fill="#86efac"/>`+tree(48,38,1.05)+thermo(14,32,.42,.85,'#ef4444')+`<g transform="translate(30 30)">${''}</g>`);
+const BACK_ART = `<svg viewBox="-12 -16 24 32" aria-hidden="true"><rect x="-4" y="-14" width="8" height="20" rx="4" fill="#fff" opacity=".92"/><circle cx="0" cy="8" r="6.5" fill="#fff" opacity=".92"/><rect x="-1.6" y="-8" width="3.2" height="14" rx="1.6" fill="#fb923c"/><circle cx="0" cy="8" r="4" fill="#fb923c"/></svg>`;
 
 const DATA = {
   basico:[
     {t:"Termômetro", d:"Aparelho que usamos para medir a temperatura.", e:"O termômetro mostra se está quente ou frio em números (graus °C)."},
-    {t:"Clima", d:"Como o tempo costuma ser num lugar ao longo de muitos anos.", e:"Clima é o padrão; o tempo é o dia a dia. Não confunda os dois!"},
+    {t:"Clima", d:"Como o tempo costuma ser num lugar ao longo de muitos anos.", e:"Clima é o padrão de muitos anos. Tempo é o dia a dia."},
     {t:"Tempo", d:"Como está o céu agora: sol, chuva ou vento.", e:"O tempo muda rápido, de um dia (ou hora) para o outro."},
     {t:"Estações", d:"Primavera, verão, outono e inverno.", e:"As estações acontecem por causa da inclinação da Terra em volta do Sol."},
     {t:"Sol", d:"A principal fonte de calor e luz da Terra.", e:"Quase toda a energia que aquece o planeta vem do Sol."},
@@ -155,8 +290,8 @@ const DATA = {
     {t:"Agasalho", d:"Roupa que usamos quando está frio.", e:"O agasalho não 'esquenta': ele segura o calor do nosso corpo."}
   ],
   inter:[
-    {t:"Albedo", d:"Fração da radiação solar refletida por uma superfície.", e:"Gelo e neve têm albedo alto (refletem muito); oceanos e florestas, baixo."},
-    {t:"Efeito estufa", d:"Retenção de calor na atmosfera por gases como CO₂ e CH₄.", e:"Sem ele a Terra teria média de ~-18 °C; o problema é sua intensificação."},
+    {t:"Albedo", d:"Fração da radiação solar refletida por uma superfície.", e:"Gelo e neve têm albedo alto e refletem muito. Oceanos e florestas têm albedo baixo."},
+    {t:"Efeito estufa", d:"Retenção de calor na atmosfera por gases como CO₂ e CH₄.", e:"Sem ele a Terra teria média de cerca de -18 °C. O problema é a sua intensificação."},
     {t:"Gradiente térmico", d:"Queda da temperatura com a altitude (~6,5 °C/km).", e:"É por isso que montanhas altas são mais frias que o nível do mar."},
     {t:"Ilha de calor urbana", d:"Aquecimento extra das cidades frente às áreas rurais.", e:"Asfalto e concreto absorvem e retêm calor, elevando a temperatura urbana."},
     {t:"Inércia térmica", d:"Atraso do aquecimento pela alta capacidade térmica dos oceanos.", e:"Os oceanos absorvem calor lentamente, retardando a resposta climática."},
@@ -165,44 +300,48 @@ const DATA = {
     {t:"Microclima", d:"Condições climáticas específicas de um local pequeno.", e:"Um parque arborizado pode ser vários graus mais fresco que a rua ao lado."}
   ],
   dificil:[
-    {t:"Forçante radiativa", d:"Variação no balanço de energia da Terra, em W/m².", e:"Forçante positiva (ex.: +CO₂) aquece o sistema; negativa (ex.: aerossóis) resfria."},
-    {t:"Sensibilidade climática", d:"Aquecimento de equilíbrio ao dobrar o CO₂ atmosférico.", e:"Estimada em ~2,5–4 °C; é parâmetro central dos modelos climáticos."},
+    {t:"Forçante radiativa", d:"Variação no balanço de energia da Terra, em W/m².", e:"Forçante positiva, como mais CO₂, aquece o sistema. Negativa, como aerossóis, resfria."},
+    {t:"Sensibilidade climática", d:"Aquecimento de equilíbrio ao dobrar o CO₂ atmosférico.", e:"O IPCC (2021) estima entre 2,5 e 4 °C, com melhor estimativa de 3 °C."},
     {t:"Albedo planetário", d:"Fração da radiação solar refletida pela Terra (~0,3).", e:"Cerca de 30% da energia solar volta ao espaço sem aquecer o planeta."},
     {t:"Inversão térmica", d:"Ar quente sobre ar frio, travando a dispersão vertical.", e:"Comum em noites frias de inverno; concentra poluentes junto ao solo."},
     {t:"Corrente de jato", d:"Vento intenso em altitude que guia sistemas meteorológicos.", e:"Flui a ~9–12 km de altitude e direciona frentes frias e tempestades."},
     {t:"ENSO", d:"Oscilação acoplada oceano-atmosfera do Pacífico (El Niño/La Niña).", e:"Altera chuvas e temperaturas no mundo todo, inclusive no Brasil."},
     {t:"Célula de Hadley", d:"Circulação atmosférica entre o equador e ~30° de latitude.", e:"Ar sobe no equador (chuva) e desce nos subtrópicos (desertos)."},
     {t:"Efeito Coriolis", d:"Desvio aparente dos ventos causado pela rotação da Terra.", e:"Desvia para a esquerda no Hemisfério Sul e para a direita no Norte."},
-    {t:"Calor latente", d:"Energia absorvida ou liberada na mudança de fase da água.", e:"A evaporação resfria a superfície; a condensação libera calor nas nuvens."},
+    {t:"Calor latente", d:"Energia absorvida ou liberada na mudança de fase da água.", e:"A evaporação resfria a superfície. A condensação libera esse calor nas nuvens."},
     {t:"Calor sensível", d:"Energia que muda a temperatura sem mudança de fase.", e:"É o calor que você 'sente': aquece o ar e o solo diretamente."},
     {t:"Ponto de orvalho", d:"Temperatura em que o ar satura e o vapor condensa.", e:"Quanto mais perto da temperatura do ar, mais úmido e abafado o dia."},
     {t:"ZCIT", d:"Faixa equatorial de nuvens onde os ventos alísios convergem.", e:"A Zona de Convergência Intertropical regula as chuvas no Norte/Nordeste."},
     {t:"Continentalidade", d:"Maior amplitude térmica em regiões afastadas do oceano.", e:"Sem o efeito regulador do mar, interiores esquentam e esfriam mais."},
     {t:"Retroalimentação gelo-albedo", d:"Degelo expõe superfície escura, que absorve mais calor.", e:"Feedback positivo: mais derretimento → mais absorção → mais aquecimento."},
-    {t:"Estratosfera", d:"Camada estável acima da troposfera, onde fica o ozônio.", e:"Nela a temperatura sobe com a altitude — o oposto da troposfera."},
+    {t:"Estratosfera", d:"Camada estável acima da troposfera, onde fica o ozônio.", e:"Nela a temperatura sobe com a altitude, ao contrário da troposfera."},
     {t:"Paleoclimatologia", d:"Estudo dos climas do passado por meio de proxies.", e:"Testemunhos de gelo, anéis de árvores e sedimentos revelam climas antigos."}
   ]
 };
 
+const LEVEL_NAMES={basico:'Básico',inter:'Intermediário',dificil:'Difícil'};
+const HINT_START='Vire duas cartas para começar. O cronômetro dispara na primeira carta.';
 let level='basico', deck=[], firstCard=null, lock=false, matched=0, errors=0;
 let startTime=null, timerInt=null, elapsed=0, scoreSaved=false;
-let db=null, fsFns=null;
+let pendingClose=null, pendingTimer=null;
+let db=null, fsFns=null, fbState='loading';
 
-const LEVEL_NAMES={basico:'Básico',inter:'Intermediário',dificil:'Difícil'};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 function setLevel(l){
   level=l;
-  document.getElementById('btnBasico').classList.toggle('active',l==='basico');
-  document.getElementById('btnInter').classList.toggle('active',l==='inter');
-  document.getElementById('btnDificil').classList.toggle('active',l==='dificil');
-  document.getElementById('rankLevel').textContent = LEVEL_NAMES[l];
+  $('btnBasico').classList.toggle('active',l==='basico');
+  $('btnInter').classList.toggle('active',l==='inter');
+  $('btnDificil').classList.toggle('active',l==='dificil');
+  $('rankLevel').textContent=LEVEL_NAMES[l];
   restart(); loadRanking();
 }
 
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
 function buildDeck(){
-  let cards=[];
+  const cards=[];
   DATA[level].forEach((p,i)=>{
     cards.push({id:i,kind:'term',label:p.t});
     cards.push({id:i,kind:'def',label:p.d});
@@ -210,21 +349,123 @@ function buildDeck(){
   return shuffle(cards);
 }
 
-function render(){
-  const board=document.getElementById('board');
-  board.classList.toggle('hard',level==='dificil');
+/* mesa livre: escolhe linhas x colunas que dividem o baralho sem sobra,
+   define o tamanho da carta e sorteia posicao e giro de cada uma */
+let zTop=100, TABLE={tw:0,th:0,w:0,h:0};
+const rnd=()=>Math.random()*2-1;
+
+function layout(deal){
+  const n=deck.length, board=$('board'), mesa=board.parentElement;
+  const small=window.innerWidth<=560;
+  const mesaPad=small?12:22, bodyPad=small?8:14;
+  const Wt=Math.min(window.innerWidth-2*bodyPad,1054)-2*mesaPad;
+  const top=mesa.getBoundingClientRect().top+window.scrollY;
+  const Hav=Math.max(300,window.innerHeight-top-2*mesaPad-(small?132:118));
+  const R=1.32, MAXW=150, MINW=small?54:84, m=small?7:14;
+  const ov=small?0.45:0.28;            /* sobreposicao vertical maxima entre fileiras */
+  let best=null;
+  for(let c=10;c>=2;c--){            /* em empate, prefere mais colunas */
+    if(n%c)continue;
+    const r=n/c;
+    const wByW=(Wt-2*m)/c-(small?5:10);
+    const hMax=(Hav-2*m)/(1+(1-ov)*(r-1));
+    const w=Math.min(MAXW,wByW,hMax/R);
+    if(!best||w>best.w) best={c,r,w,wByW};
+  }
+  const c=best.c, r=best.r;
+  const w=Math.floor(Math.max(Math.min(MINW,best.wByW),best.w)), h=w*R;
+  const tw=Math.min(Wt,c*(w+(small?8:24))+2*m);
+  const natural=r*(h+(small?10:20))+2*m;
+  const tight=2*m+h*(1+(1-ov)*(r-1));
+  const th=Math.round(Math.max(tight,Math.min(Hav,natural)));
+  const stepX=c>1?(tw-2*m-w)/(c-1):0, stepY=r>1?(th-2*m-h)/(r-1):0;
+  const jx=Math.max(2,Math.min(small?5:11,(stepX-w)/2+4)), jy=small?5:9;
+  const rot=small?8:(n>16?9:11);
+  TABLE={tw,th,w,h};
+  const st=document.documentElement.style;
+  st.setProperty('--tw',tw+'px'); st.setProperty('--th',th+'px');
+  st.setProperty('--cw',w+'px');
+  st.setProperty('--fs',Math.max(8.5,Math.min(14.5,w*0.108)).toFixed(1)+'px');
+  [...board.children].forEach((el,i)=>{
+    const col=i%c,row=Math.floor(i/c);
+    setPos(el,m+col*stepX+rnd()*jx,m+row*stepY+rnd()*jy);
+    el.style.setProperty('--r',(rnd()*rot).toFixed(1)+'deg');
+    el.style.setProperty('--z',i+1);
+    el.style.setProperty('--sx',(tw/2-w/2).toFixed(0)+'px');
+    el.style.setProperty('--sy',(th-h*0.35).toFixed(0)+'px');
+    el.style.setProperty('--d',(i*(n>16?34:55))+'ms');
+    el.classList.toggle('deal',!!deal);
+  });
+  zTop=100;
+}
+function setPos(el,x,y){
+  const T=TABLE;
+  el._x=Math.max(-T.w*0.25,Math.min(T.tw-T.w*0.75,x));
+  el._y=Math.max(-T.h*0.25,Math.min(T.th-T.h*0.75,y));
+  el.style.setProperty('--x',el._x.toFixed(1)+'px');
+  el.style.setProperty('--y',el._y.toFixed(1)+'px');
+}
+
+/* arrastar: puxa a carta de cima da outra; toque curto continua virando a carta */
+function makeDraggable(el){
+  let g=null;
+  el.addEventListener('pointerdown',e=>{
+    if(e.button!==undefined&&e.button!==0)return;
+    g={px:e.clientX,py:e.clientY,ox:el._x,oy:el._y,moved:false,id:e.pointerId};
+    try{el.setPointerCapture(e.pointerId);}catch(_){}
+  });
+  el.addEventListener('pointermove',e=>{
+    if(!g||e.pointerId!==g.id)return;
+    const dx=e.clientX-g.px, dy=e.clientY-g.py;
+    if(!g.moved){
+      if(Math.hypot(dx,dy)<8)return;
+      g.moved=true; el.classList.remove('deal'); el.classList.add('drag');
+    }
+    setPos(el,g.ox+dx,g.oy+dy);
+  });
+  const end=e=>{
+    if(!g||e.pointerId!==g.id)return;
+    if(g.moved){
+      el.classList.remove('drag');
+      el.style.setProperty('--z',++zTop);
+      el._dragged=true; setTimeout(()=>{el._dragged=false;},60);
+    }
+    g=null;
+  };
+  el.addEventListener('pointerup',end);
+  el.addEventListener('pointercancel',end);
+}
+
+function render(deal){
+  const board=$('board');
   board.innerHTML='';
   deck.forEach((c,idx)=>{
-    const el=document.createElement('div');
+    const el=document.createElement('button');
+    el.type='button';
     el.className='card';
-    el.innerHTML=`<div class="inner">
-        <div class="face front">?</div>
-        <div class="face back ${c.kind==='term'?'term':''}">${c.label}</div>
-      </div>`;
-    el.addEventListener('click',()=>flip(idx,el));
+    el.setAttribute('aria-label','Carta '+(idx+1)+', virada para baixo');
+    const back=c.kind==='term'
+      ? `<div class="face back term"><div class="art">${ART[c.label]||''}</div><div class="lbl">${esc(c.label)}</div></div>`
+      : `<div class="face back def">${esc(c.label)}</div>`;
+    el.innerHTML=`<div class="inner"><div class="face front">${BACK_ART}</div>${back}</div>`;
+    el.addEventListener('click',()=>{ if(el._dragged){el._dragged=false;return;} flip(idx,el); });
+    makeDraggable(el);
     board.appendChild(el);
   });
-  document.getElementById('total').textContent=DATA[level].length;
+  $('total').textContent=DATA[level].length;
+  layout(deal);
+  fitText();
+}
+
+/* reduz a fonte so das cartas cujo texto nao cabe */
+function fitText(){
+  document.querySelectorAll('#board .back.def, #board .lbl').forEach(el=>{
+    el.style.fontSize='';
+    const box=el.classList.contains('lbl')?el.parentElement:el;
+    let fs=parseFloat(getComputedStyle(el).fontSize), n=0;
+    const over=()=>box.scrollHeight>box.clientHeight+1||el.scrollWidth>el.clientWidth+1;
+    while(over()&&fs>6.5&&n++<24){fs-=0.5;el.style.fontSize=fs+'px';}
+  });
 }
 
 function startTimer(){
@@ -232,125 +473,147 @@ function startTimer(){
   startTime=Date.now();
   timerInt=setInterval(()=>{
     elapsed=Math.floor((Date.now()-startTime)/1000);
-    document.getElementById('timer').textContent=elapsed+'s';
+    $('timer').textContent=elapsed+'s';
   },500);
 }
 
+function rowHtml(c){
+  return `<div class="row"><span class="tag ${c.kind==='def'?'d':''}">${c.kind==='def'?'Definição':'Conceito'}</span><span>${esc(c.label)}</span></div>`;
+}
+function setReader(html){ $('reader').innerHTML=html; }
+
+function closePending(){
+  if(!pendingClose)return;
+  clearTimeout(pendingTimer);
+  const f=pendingClose; pendingClose=null; pendingTimer=null; f();
+}
+
 function flip(idx,el){
+  if(pendingClose) closePending();
   if(lock||el.classList.contains('flip')||el.classList.contains('matched'))return;
   startTimer();
   el.classList.add('flip');
-  if(!firstCard){firstCard={idx,el};return;}
-  lock=true;
-  const a=deck[firstCard.idx], b=deck[idx];
+  el.setAttribute('aria-label',deck[idx].label);
+  if(!firstCard){
+    firstCard={idx,el};
+    setReader(rowHtml(deck[idx])+`<div class="hint" style="margin-top:6px">Agora vire a carta que combina com esta.</div>`);
+    return;
+  }
+  const a=deck[firstCard.idx], b=deck[idx], first=firstCard;
   if(a.id===b.id){
+    lock=true;
+    const p=DATA[level][a.id];
+    setReader(`<div class="msg ok" style="margin-top:0">Par certo: ${esc(p.t)}</div><div>${esc(p.d)}</div><div class="exp">${esc(p.e)}</div>`);
     setTimeout(()=>{
-      firstCard.el.classList.add('matched');el.classList.add('matched');
-      matched++;document.getElementById('pairs').textContent=matched;
-      const p=DATA[level][a.id];
-      document.getElementById('feedback').innerHTML=`✅ <b>${p.t}</b> → ${p.d}<br>${p.e}`;
+      first.el.classList.add('matched');el.classList.add('matched');
+      matched++;$('pairs').textContent=matched;
       firstCard=null;lock=false;
       if(matched===DATA[level].length)win();
     },450);
   }else{
-    errors++;document.getElementById('errors').textContent=errors;
-    document.getElementById('feedback').innerHTML="❌ Não formam par (+1 erro). Memorize a posição e tente de novo!";
-    setTimeout(()=>{
-      firstCard.el.classList.remove('flip');el.classList.remove('flip');
-      firstCard=null;lock=false;
-    },900);
+    errors++;$('errors').textContent=errors;
+    first.el.classList.add('wrong');el.classList.add('wrong');
+    setReader(rowHtml(a)+rowHtml(b)+`<div class="msg no">Não formam par. <span class="hint">Toque em outra carta para continuar.</span></div>`);
+    firstCard=null;
+    /* tempo de leitura proporcional ao tamanho do texto; tocar em outra carta fecha antes */
+    const ms=Math.min(6000,1800+(a.label.length+b.label.length)*38);
+    pendingClose=()=>{
+      [first.el,el].forEach(x=>{x.classList.remove('flip','wrong');x.setAttribute('aria-label','Carta virada para baixo');});
+    };
+    pendingTimer=setTimeout(closePending,ms);
   }
 }
 
 function win(){
   clearInterval(timerInt);
-  const w=document.getElementById('win');
-  const nivel=LEVEL_NAMES[level];
-  document.getElementById('winMsg').textContent=
-    `Nível ${nivel}: ${DATA[level].length} pares, ${errors} erro(s), ${elapsed}s. Coloque seu nome e entre para o Ranking Global! 🌍`;
-  document.getElementById('saveStatus').textContent='';
-  document.getElementById('saveBtn').disabled=false;
+  $('winMsg').textContent=`Nível ${LEVEL_NAMES[level]}: ${DATA[level].length} pares, ${errors} erro(s), ${elapsed}s. Coloque seu nome e entre para o Ranking Global.`;
+  $('saveStatus').textContent='';
+  $('saveBtn').disabled=false;
   scoreSaved=false;
+  const w=$('win');
   w.classList.add('show');
-  w.scrollIntoView({behavior:'smooth'});
+  w.scrollIntoView({behavior:'smooth',block:'center'});
 }
 
 function restart(){
-  clearInterval(timerInt);startTime=null;elapsed=0;
+  clearInterval(timerInt);clearTimeout(pendingTimer);pendingClose=null;pendingTimer=null;
+  startTime=null;elapsed=0;
   deck=buildDeck();firstCard=null;lock=false;matched=0;errors=0;
-  document.getElementById('pairs').textContent=0;
-  document.getElementById('errors').textContent=0;
-  document.getElementById('timer').textContent='0s';
-  document.getElementById('feedback').innerHTML="Vire duas cartas para começar — o cronômetro dispara na primeira carta. 👀";
-  document.getElementById('win').classList.remove('show');
-  render();
+  $('pairs').textContent=0;
+  $('errors').textContent=0;
+  $('timer').textContent='0s';
+  setReader(`<div class="hint" style="font-size:1rem">${HINT_START}</div>`);
+  $('win').classList.remove('show');
+  render(true);
 }
 
-/* ---------- Firebase: ranking global ---------- */
+let resizeT=null;
+window.addEventListener('resize',()=>{clearTimeout(resizeT);resizeT=setTimeout(()=>{layout(false);fitText();},150);});
+
+/* ---------- ranking (Firestore) ---------- */
 async function initFirebase(){
-  const note=document.getElementById('rankNote');
-  if(!firebaseConfig.apiKey){
-    document.getElementById('rankList').innerHTML='<li><span>Ranking online ainda não configurado</span></li>';
-    note.textContent='Para ativar: cole o firebaseConfig no topo do código (instruções no comentário).';
-    return;
-  }
   try{
     const appM=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
     const fsM=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
     const app=appM.initializeApp(firebaseConfig);
     db=fsM.getFirestore(app);
     fsFns=fsM;
+    fbState='ok';
     loadRanking();
   }catch(e){
-    note.textContent='Sem conexão — o ranking online aparece quando houver internet.';
+    fbState='off';
+    $('rankList').innerHTML='<li><span>Ranking indisponível sem internet.</span></li>';
+    $('rankNote').textContent='O jogo funciona normalmente. O ranking volta quando houver conexão.';
   }
 }
 
-function scoreOf(err,sec){return err*1000+sec;} // menor = melhor: erros pesam mais que segundos
+function scoreOf(err,sec){return err*1000+sec;}
 
 async function saveScore(){
   if(scoreSaved)return;
-  const name=document.getElementById('playerName').value.trim();
-  const st=document.getElementById('saveStatus');
-  if(!name){st.textContent='Digite seu nome primeiro 😉';return;}
-  if(!db){st.textContent='Ranking online não configurado — resultado válido só localmente.';return;}
+  const name=$('playerName').value.trim();
+  const st=$('saveStatus');
+  if(!name){st.textContent='Digite seu nome primeiro.';return;}
+  if(!db){st.textContent='Sem conexão com o ranking. Seu resultado não foi enviado.';return;}
   try{
-    document.getElementById('saveBtn').disabled=true;
+    $('saveBtn').disabled=true;
     await fsFns.addDoc(
       fsFns.collection(db,'games',GAME_ID,'scores'),
       {name:name.slice(0,20),score:scoreOf(errors,elapsed),errors:errors,seconds:elapsed,
        level:level,ts:fsFns.serverTimestamp()}
     );
     scoreSaved=true;
-    st.textContent='✅ Salvo no Ranking Global!';
+    st.textContent='Salvo no Ranking Global!';
     loadRanking();
   }catch(e){
-    document.getElementById('saveBtn').disabled=false;
-    st.textContent='Erro ao salvar — verifique a internet e as regras do Firestore.';
+    $('saveBtn').disabled=false;
+    st.textContent='Erro ao salvar. Verifique a internet e tente de novo.';
   }
 }
 
 async function loadRanking(){
   if(!db)return;
-  const list=document.getElementById('rankList');
+  const list=$('rankList'), asked=level;
   try{
+    /* filtra por nível no servidor e ordena aqui: cada nível tem o seu ranking completo,
+       sem depender de índice composto no Firestore */
     const q=fsFns.query(
       fsFns.collection(db,'games',GAME_ID,'scores'),
-      fsFns.orderBy('score','asc'), fsFns.limit(50)
+      fsFns.where('level','==',asked), fsFns.limit(1000)
     );
     const snap=await fsFns.getDocs(q);
+    if(asked!==level)return;
     const rows=[];
-    snap.forEach(d=>{const v=d.data();if(v.level===level)rows.push(v);});
-    if(!rows.length){list.innerHTML='<li><span>Seja o primeiro do ranking! 🚀</span></li>';return;}
+    snap.forEach(d=>rows.push(d.data()));
+    rows.sort((a,b)=>(a.score-b.score));
+    if(!rows.length){list.innerHTML='<li><span>Seja o primeiro do ranking!</span></li>';return;}
     list.innerHTML=rows.slice(0,10).map((r,i)=>
-      `<li><span>${['🥇','🥈','🥉'][i]||(i+1)+'º'} ${escapeHtml(r.name)}</span><span>${r.errors} erro(s) · ${r.seconds}s</span></li>`
+      `<li><span><span class="pos">${i+1}º</span>${esc(r.name)}</span><span>${Number(r.errors)||0} erro(s) · ${Number(r.seconds)||0}s</span></li>`
     ).join('');
   }catch(e){
     list.innerHTML='<li><span>Não foi possível carregar o ranking.</span></li>';
   }
 }
-
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
 restart();
 initFirebase();
